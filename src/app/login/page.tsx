@@ -8,6 +8,8 @@ import toast from "react-hot-toast";
 
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const searchParams = useSearchParams();
   const router = useRouter();
   const message = searchParams.get("message");
@@ -32,7 +34,7 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-[calc(100dvh-80px)] flex items-center justify-center p-5">
+    <div className="min-h-[calc(100dvh-80px)] flex flex-col md:flex-row items-center justify-center p-5 gap-6">
       <div className="w-full max-w-[400px] bg-card border border-border rounded-xl p-8">
         <h1 className="text-2xl font-bold text-foreground mb-1 text-center">Welcome back</h1>
         <p className="text-sm text-muted text-center mb-6">Log in to your account</p>
@@ -40,7 +42,16 @@ function LoginForm() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="email" className="text-sm font-medium text-foreground">Email</label>
-            <input type="email" id="email" name="email" required placeholder="you@example.com" className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors" />
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              required 
+              placeholder="you@example.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors" 
+            />
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -52,6 +63,8 @@ function LoginForm() {
                 name="password" 
                 required 
                 placeholder="••••••••" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 pr-10 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors"
               />
               <button
@@ -79,6 +92,28 @@ function LoginForm() {
         <p className="mt-6 text-sm text-center text-muted">
           Don't have an account? <Link href="/signup" className="text-foreground font-medium underline underline-offset-4 hover:opacity-80">Sign up</Link>
         </p>
+      </div>
+
+      {/* Guest Login Section */}
+      <div className="w-full max-w-[350px] md:max-w-[300px] bg-card border border-border rounded-xl p-6">
+        <h2 className="text-lg font-bold text-foreground mb-2">For Testers</h2>
+        <p className="text-sm text-muted mb-4">Click below to auto-fill guest credentials and log in instantly.</p>
+        
+        <div className="bg-background border border-border p-3 rounded-md mb-4 font-mono text-sm space-y-1.5 break-all">
+          <p><span className="text-muted font-sans font-medium">Email:</span><br />guestuser@blog-hut.vercel.app</p>
+          <p><span className="text-muted font-sans font-medium">Password:</span><br />Guest@123</p>
+        </div>
+        
+        <button 
+          type="button" 
+          onClick={() => {
+            setEmail("guestuser@blog-hut.vercel.app");
+            setPassword("Guest@123");
+          }}
+          className="w-full bg-border text-foreground py-2.5 rounded-md font-semibold text-sm hover:bg-muted transition-colors"
+        >
+          Apply Credentials
+        </button>
       </div>
     </div>
   );
