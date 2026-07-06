@@ -52,8 +52,8 @@ export async function createBlog(formData: FormData) {
     slug = `${slug}-${Math.random().toString(36).substring(2, 8)}`;
   }
 
-  if (slug.length < 5 || slug.length > 30) {
-    return { error: "Slug must be between 5 and 30 characters long." };
+  if (slug.length < 5 || slug.length > 60) {
+    return { error: "Slug must be between 5 and 60 characters long." };
   }
 
   const tags = tagsStr ? tagsStr.split(",").map((t) => t.trim()).filter(Boolean) : [];
@@ -98,8 +98,8 @@ export async function updateBlog(formData: FormData) {
   const tags = tagsStr ? tagsStr.split(",").map((t) => t.trim()).filter(Boolean) : [];
 
   let slug = (formData.get("slug") as string)?.trim();
-  if (slug && (slug.length < 5 || slug.length > 30)) {
-    return { error: "Slug must be between 5 and 30 characters long." };
+  if (slug && (slug.length < 5 || slug.length > 60)) {
+    return { error: "Slug must be between 5 and 60 characters long." };
   }
 
   const updateData: any = {

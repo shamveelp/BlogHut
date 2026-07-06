@@ -1,13 +1,11 @@
 import Hero from "@/components/sections/Hero";
-import RecentPosts from "@/components/sections/RecentPosts";
-import AllPosts from "@/components/sections/AllPosts";
+import HomeClient from "./HomeClient";
 
 export default function HomePage() {
   return (
     <>
       <Hero />
-      <RecentPosts />
-      <AllPosts />
+      <HomeClient />
     </>
   );
 }

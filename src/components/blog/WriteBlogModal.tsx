@@ -71,7 +71,7 @@ export default function WriteBlogModal({
 
   // Debounced slug checker
   useEffect(() => {
-    if (!slug || slug.length < 5 || slug.length > 30) {
+    if (!slug || slug.length < 5 || slug.length > 60) {
       setSlugAvailable(null);
       return;
     }
@@ -223,16 +223,16 @@ export default function WriteBlogModal({
                   <span>Custom Slug URL</span>
                   <span className={`text-xs font-semibold ${
                     slug.length > 0 && slug.length < 5 ? 'text-red-500' :
-                    slug.length > 30 ? 'text-red-500' :
+                    slug.length > 60 ? 'text-red-500' :
                     slugAvailable === false ? 'text-red-500' :
                     slugAvailable === true ? 'text-green-500' : 'text-muted'
                   }`}>
                     {slug.length > 0 && slug.length < 5 ? 'Too short (min 5)' :
-                     slug.length > 30 ? 'Too long (max 30)' :
+                     slug.length > 60 ? 'Too long (max 60)' :
                      checkingSlug ? 'Checking...' :
                      slugAvailable === false ? 'Slug is taken' :
                      slugAvailable === true ? 'Slug available' :
-                     `${slug.length} / 30`}
+                     `${slug.length} / 60`}
                   </span>
                 </label>
                 <div className="relative flex items-center">
@@ -243,7 +243,7 @@ export default function WriteBlogModal({
                     value={slug} 
                     onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} 
                     className={`w-full bg-transparent border ${
-                      slug.length > 0 && (slug.length < 5 || slug.length > 30 || slugAvailable === false) 
+                      slug.length > 0 && (slug.length < 5 || slug.length > 60 || slugAvailable === false) 
                         ? 'border-red-500 focus:ring-red-500' 
                         : slugAvailable === true 
                         ? 'border-green-500 focus:ring-green-500' 

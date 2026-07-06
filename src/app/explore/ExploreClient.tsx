@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
-import { GridBlogCard } from "@/components/blog/BlogCards";
+import { GridBlogCard, LargeBlogCard, SmallBlogCard, WideBlogCard } from "@/components/blog/BlogCards";
 
 const CATEGORIES = [
   "All",
@@ -21,7 +21,7 @@ const CATEGORIES = [
   "Software Development"
 ];
 
-const ITEMS_PER_PAGE = 9;
+const ITEMS_PER_PAGE = 10;
 
 export default function ExploreClient() {
   const searchParams = useSearchParams();
@@ -33,6 +33,7 @@ export default function ExploreClient() {
   const [blogs, setBlogs] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -111,23 +112,39 @@ export default function ExploreClient() {
       </div>
 
       {/* Categories Filter */}
-      <div className="flex flex-wrap gap-2 mb-12">
-        {CATEGORIES.map(cat => (
-          <button
-            key={cat}
-            onClick={() => {
-              setCategory(cat);
-              setPage(1);
-            }}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
-              category === cat 
-                ? 'bg-foreground text-background border-foreground shadow-md' 
-                : 'bg-card text-muted hover:text-foreground border-border hover:border-muted'
-            }`}
+      <div className="mb-12">
+        <div className={`flex flex-wrap gap-2 overflow-hidden transition-[max-height] duration-500 ease-in-out ${showAllCategories ? 'max-h-[1000px]' : 'max-h-[40px] md:max-h-[1000px]'}`}>
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat}
+              onClick={() => {
+                setCategory(cat);
+                setPage(1);
+              }}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border shrink-0 ${
+                category === cat 
+                  ? 'bg-foreground text-background border-foreground shadow-md' 
+                  : 'bg-card text-muted hover:text-foreground border-border hover:border-muted'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+        
+        {/* Mobile Show More Button */}
+        <button 
+          onClick={() => setShowAllCategories(!showAllCategories)}
+          className="md:hidden mt-3 text-sm font-semibold text-muted hover:text-foreground flex items-center gap-1 transition-colors"
+        >
+          {showAllCategories ? 'Show less' : 'Show more topics'}
+          <svg 
+            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
+            className={`transition-transform duration-300 ${showAllCategories ? 'rotate-180' : ''}`}
           >
-            {cat}
-          </button>
-        ))}
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
       </div>
 
       {/* Results State */}
@@ -146,22 +163,59 @@ export default function ExploreClient() {
           ))}
         </div>
       ) : blogs.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {blogs.map(blog => (
-            <GridBlogCard 
-              key={blog.id}
-              post={{
-                slug: blog.slug,
-                author: "BlogHut Author",
-                date: new Date(blog.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }),
-                title: blog.title,
-                excerpt: blog.excerpt,
-                tags: blog.tags || [],
-                imgSeed: blog.cover_image || "a",
-              }}
-            />
-          ))}
-        </div>
+        (() => {
+          const isNormalTime = page === 1 && !query && category === "All" && blogs.length >= 4;
+          const formattedBlogs = blogs.map(blog => ({
+            id: blog.id,
+            slug: blog.slug,
+            author: "BlogHut Author",
+            date: new Date(blog.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }),
+            title: blog.title,
+            excerpt: blog.excerpt,
+            tags: blog.tags || [],
+            imgSeed: blog.cover_image || "a",
+          }));
+
+          if (isNormalTime) {
+            const [large, small1, small2, wide, ...rest] = formattedBlogs;
+            return (
+              <>
+                <div className="mb-12">
+                  <h2 className="text-lg font-semibold tracking-tight text-foreground mb-8">Recent blog posts</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 mb-6">
+                    <LargeBlogCard post={large} />
+                    <div className="flex flex-col gap-6">
+                      <SmallBlogCard post={small1} />
+                      <SmallBlogCard post={small2} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-6">
+                    <WideBlogCard post={wide} />
+                  </div>
+                </div>
+                
+                {rest.length > 0 && (
+                  <>
+                    <h2 className="text-lg font-semibold tracking-tight text-foreground mb-6">All blog posts</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {rest.map(post => (
+                        <GridBlogCard key={post.id} post={post} />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            );
+          }
+
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {formattedBlogs.map(post => (
+                <GridBlogCard key={post.id} post={post} />
+              ))}
+            </div>
+          );
+        })()
       ) : (
         <div className="py-32 flex flex-col items-center justify-center border border-dashed border-border rounded-2xl bg-card/50">
           <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-muted/30 mb-6"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
