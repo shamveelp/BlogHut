@@ -1,28 +1,29 @@
-import { createClient } from "@supabase/supabase-js";
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+export async function createSupabaseServerClient() {
+  const cookieStore = await cookies()
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    "Missing Supabase environment variables. Check your .env file."
-  );
-}
-
-/**
- * Returns a new Supabase client for use in Server Components,
- * Route Handlers, and Server Actions.
- *
- * A fresh instance is created per call so it never carries
- * stale auth state between requests.
- */
-export function createServerSupabaseClient() {
-  return createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      // Disable automatic session persistence on the server
-      persistSession: false,
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-    },
-  });
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    }
+  )
 }

@@ -28,11 +28,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { Toaster } from "react-hot-toast";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <html
       lang="en"
@@ -40,7 +46,17 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="site-body">
-        <Navbar />
+        <Toaster 
+          position="top-center" 
+          toastOptions={{
+            style: {
+              background: 'var(--bg-card)',
+              color: 'var(--text)',
+              border: '1px solid var(--border)',
+            }
+          }}
+        />
+        <Navbar user={user} />
         <main id="main-content" className="site-main">
           {children}
         </main>

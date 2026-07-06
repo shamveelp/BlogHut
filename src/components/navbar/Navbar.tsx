@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useTransition } from "react";
 import Link from "next/link";
+import { logout } from "@/app/auth/actions";
 
-export default function Navbar() {
+export default function Navbar({ user }: { user: any }) {
   const [dark, setDark] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,22 +46,40 @@ export default function Navbar() {
           </button>
 
           <div className="profile-menu" ref={dropdownRef}>
-            <button
-              className="profile-btn"
-              onClick={() => setProfileOpen((v) => !v)}
-              aria-label="Toggle profile menu"
-              aria-expanded={profileOpen}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-            </button>
-            
-            {profileOpen && (
-              <div className="profile-dropdown">
-                <Link href="/profile" className="profile-dropdown__link" onClick={() => setProfileOpen(false)}>Profile</Link>
-                <button className="profile-dropdown__btn" onClick={() => setProfileOpen(false)}>Logout</button>
+            {user ? (
+              <>
+                <button
+                  className="profile-btn"
+                  onClick={() => setProfileOpen((v) => !v)}
+                  aria-label="Toggle profile menu"
+                  aria-expanded={profileOpen}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </button>
+                
+                {profileOpen && (
+                  <div className="profile-dropdown">
+                    <div className="profile-dropdown__header" style={{ padding: "8px 12px", fontSize: "12px", color: "var(--text-muted)", borderBottom: "1px solid var(--border)", marginBottom: "4px" }}>
+                      {user.user_metadata?.full_name || user.email}
+                    </div>
+                    <Link href="/profile" className="profile-dropdown__link" onClick={() => setProfileOpen(false)}>Profile</Link>
+                    <button 
+                      className="profile-dropdown__btn" 
+                      onClick={() => startTransition(() => logout())}
+                      disabled={isPending}
+                    >
+                      {isPending ? "Logging out..." : "Logout"}
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                <Link href="/login" style={{ fontSize: '14px', fontWeight: 500 }}>Log in</Link>
+                <Link href="/signup" className="auth-btn" style={{ padding: '8px 16px', marginTop: 0 }}>Sign up</Link>
               </div>
             )}
           </div>
@@ -84,8 +104,23 @@ export default function Navbar() {
         <div className="mobile-menu-content">
           <Link href="/" className="mobile-menu-logo" onClick={() => setMenuOpen(false)}>Blog Hut</Link>
 
-          <Link href="/profile" className="mobile-menu-link" onClick={() => setMenuOpen(false)}>Profile</Link>
-          <button className="mobile-menu-link" onClick={() => setMenuOpen(false)}>Logout</button>
+          {user ? (
+            <>
+              <Link href="/profile" className="mobile-menu-link" onClick={() => setMenuOpen(false)}>Profile</Link>
+              <button 
+                className="mobile-menu-link" 
+                onClick={() => startTransition(() => logout())}
+                disabled={isPending}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="mobile-menu-link" onClick={() => setMenuOpen(false)}>Log in</Link>
+              <Link href="/signup" className="mobile-menu-link" onClick={() => setMenuOpen(false)}>Sign up</Link>
+            </>
+          )}
 
           <button
             className="theme-toggle mobile-theme-toggle"
