@@ -9,6 +9,9 @@ import { useRouter } from "next/navigation";
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+
+  const [email, setEmail] = useState("");
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -32,14 +35,20 @@ export default function SignupPage() {
             <input type="text" id="name" name="name" required placeholder="John Doe" className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors" />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="username" className="text-sm font-medium text-foreground">Username</label>
-            <input type="text" id="username" name="username" required placeholder="johndoe123" className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors" />
-          </div>
+
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="email" className="text-sm font-medium text-foreground">Email</label>
-            <input type="email" id="email" name="email" required placeholder="you@example.com" className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors" />
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              required 
+              placeholder="you@example.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors" 
+            />
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -73,7 +82,13 @@ export default function SignupPage() {
             </div>
           </div>
 
-          <button type="submit" className="bg-foreground text-background py-3 rounded-md font-semibold text-[15px] mt-3 hover:opacity-85 transition-opacity disabled:opacity-50">Sign up</button>
+          <button 
+            type="submit" 
+
+            className="bg-foreground text-background py-3 rounded-md font-semibold text-[15px] mt-3 hover:opacity-85 transition-opacity disabled:opacity-50"
+          >
+            Sign up
+          </button>
         </form>
 
         <p className="mt-6 text-sm text-center text-muted">

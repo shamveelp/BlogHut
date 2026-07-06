@@ -25,7 +25,6 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const username = formData.get("username") as string;
   const name = formData.get("name") as string;
 
   const supabase = await createSupabaseServerClient();
@@ -35,7 +34,6 @@ export async function signup(formData: FormData) {
     password,
     options: {
       data: {
-        username,
         full_name: name,
       },
     },
@@ -79,3 +77,6 @@ export async function updateProfile(formData: FormData) {
   revalidatePath("/profile");
   return { success: true };
 }
+
+
+
