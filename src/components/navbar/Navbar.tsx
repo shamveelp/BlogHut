@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useTransition } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { logout } from "@/app/auth/actions";
+import WriteBlogModal from "@/components/blog/WriteBlogModal";
 
 export default function Navbar({ user }: { user: any }) {
   const [mounted, setMounted] = useState(false);
@@ -173,26 +174,7 @@ export default function Navbar({ user }: { user: any }) {
           </div>
 
           {writeModalOpen && (
-            <div className="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="bg-card border border-border rounded-xl w-full max-w-[600px] shadow-2xl flex flex-col max-h-[90dvh]">
-                <div className="flex items-center justify-between p-5 sm:p-6 border-b border-border">
-                  <h2 className="text-xl font-bold text-foreground">Create a new story</h2>
-                  <button className="text-muted hover:text-foreground transition-colors" onClick={() => setWriteModalOpen(false)}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                  </button>
-                </div>
-                <div className="p-5 sm:p-6 overflow-y-auto">
-                  <form className="flex flex-col gap-4">
-                    <input type="text" placeholder="Title" className="bg-transparent border border-border rounded-lg p-4 font-sans text-xl sm:text-2xl font-semibold text-foreground focus:outline-none focus:border-muted transition-colors" />
-                    <textarea placeholder="Tell your story..." className="bg-transparent border border-border rounded-lg p-4 font-sans text-base text-foreground min-h-[200px] sm:min-h-[250px] resize-none focus:outline-none focus:border-muted transition-colors"></textarea>
-                    <div className="flex justify-end gap-3 mt-2 pt-2">
-                      <button type="button" className="px-5 py-2.5 rounded-md font-semibold text-sm text-foreground bg-transparent border border-border hover:bg-foreground/5 transition-colors" onClick={() => setWriteModalOpen(false)}>Cancel</button>
-                      <button type="submit" className="px-5 py-2.5 rounded-md font-semibold text-sm bg-foreground text-background hover:opacity-85 transition-opacity">Publish</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
+            <WriteBlogModal onClose={() => setWriteModalOpen(false)} />
           )}
         </>,
         document.body

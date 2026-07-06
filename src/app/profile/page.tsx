@@ -10,5 +10,11 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  return <ProfileClient user={user} />;
+  const { data: blogs } = await supabase
+    .from("blogs")
+    .select("*")
+    .eq("author_id", user.id)
+    .order("created_at", { ascending: false });
+
+  return <ProfileClient user={user} initialBlogs={blogs || []} />;
 }

@@ -36,13 +36,17 @@ export function BlogTag({ label }: { label: string }) {
 }
 
 export function PostImage({ seed, alt }: { seed: string; alt: string }) {
+  const isUrl = seed.startsWith("http");
   return (
     <div
       className="w-full h-full relative overflow-hidden rounded-lg group-hover:opacity-90 transition-opacity"
-      style={{ background: `var(--img-${seed || "a"})` }}
+      style={!isUrl ? { background: `var(--img-${seed || "a"})` } : {}}
       role="img"
       aria-label={alt}
     >
+      {isUrl && (
+        <img src={seed} alt={alt} className="absolute inset-0 w-full h-full object-cover" />
+      )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
     </div>
   );
