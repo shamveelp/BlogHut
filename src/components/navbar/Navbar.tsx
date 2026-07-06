@@ -37,9 +37,12 @@ export default function Navbar({ user }: { user: any }) {
   return (
     <header className="sticky top-0 z-[100] w-full bg-background/80 backdrop-blur-lg border-b border-border transition-colors duration-300" role="banner">
       <div className="max-w-[1200px] mx-auto px-8 h-20 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold tracking-tight text-foreground hover:opacity-80 transition-opacity z-[1001]">Blog Hut</Link>
+        <Link href="/" className="hover:opacity-80 transition-opacity z-[1001] flex items-center">
+          <img src="/Main/bloghut-bg.png" alt="Blog Hut Logo" className="h-8 sm:h-10 w-auto object-contain" />
+        </Link>
 
         <div className="flex items-center gap-4 sm:gap-6">
+          <Link href="/explore" className="text-sm font-semibold text-muted hover:text-foreground transition-colors hidden sm:block">Explore</Link>
           <GlobalSearch />
           
           <button
@@ -131,6 +134,8 @@ export default function Navbar({ user }: { user: any }) {
           <div className={`fixed inset-0 z-[999] bg-background flex flex-col items-center justify-center overflow-y-auto transition-all duration-300 ${menuOpen ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'}`} aria-hidden={!menuOpen}>
             <div className={`flex flex-col items-center gap-8 py-12 w-full max-w-xs transition-transform duration-500 delay-100 ${menuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
               <div className="text-xl font-bold text-foreground mb-4">Blog Hut</div>
+
+              <Link href="/explore" className="text-[17px] font-normal text-foreground/90 hover:text-foreground transition-colors" onClick={() => setMenuOpen(false)}>Explore</Link>
 
               {user ? (
                 <>

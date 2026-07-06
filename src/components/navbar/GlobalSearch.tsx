@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { searchBlogs } from "@/app/blog/actions";
 import { PostImage } from "@/components/blog/BlogCards";
 
@@ -11,6 +12,7 @@ export default function GlobalSearch() {
   const [results, setResults] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const router = useRouter();
   
   const containerRef = useRef<HTMLDivElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
@@ -57,6 +59,14 @@ export default function GlobalSearch() {
     }, 100);
   };
 
+  const handleSearch = () => {
+    if (query.trim()) {
+      router.push(`/explore?q=${encodeURIComponent(query.trim())}`);
+      setIsOpen(false);
+      setQuery("");
+    }
+  };
+
   const SearchResults = () => (
     <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-[1000] max-h-[400px] overflow-y-auto">
       {isSearching && (
@@ -100,6 +110,9 @@ export default function GlobalSearch() {
           onFocus={() => {
             if (query.trim()) setIsOpen(true);
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSearch();
+          }}
           className="w-[250px] lg:w-[350px] bg-card border border-border rounded-full pl-10 pr-4 py-2 text-sm text-foreground focus:outline-none focus:border-muted transition-all placeholder:text-muted shadow-sm"
         />
         {isOpen && query.trim() && (
@@ -131,15 +144,27 @@ export default function GlobalSearch() {
                   placeholder="Search anything..." 
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSearch();
+                  }}
                   className="w-full bg-transparent pl-12 pr-4 py-2 text-sm text-foreground focus:outline-none"
                 />
               </div>
-              <button 
-                onClick={() => { setIsOpen(false); setQuery(""); }}
-                className="text-sm font-semibold text-muted hover:text-foreground shrink-0 px-2"
-              >
-                Cancel
-              </button>
+              {query.trim() ? (
+                <button 
+                  onClick={handleSearch}
+                  className="text-sm font-semibold text-foreground bg-muted/20 hover:bg-muted/30 px-4 py-2 rounded-full shrink-0 transition-colors"
+                >
+                  Search
+                </button>
+              ) : (
+                <button 
+                  onClick={() => { setIsOpen(false); setQuery(""); }}
+                  className="text-sm font-semibold text-muted hover:text-foreground shrink-0 px-2"
+                >
+                  Cancel
+                </button>
+              )}
             </div>
             
             <div className="max-h-[50vh] overflow-y-auto">
