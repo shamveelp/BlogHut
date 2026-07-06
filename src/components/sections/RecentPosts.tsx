@@ -93,9 +93,9 @@ export default function RecentPosts() {
   const wide = rest[2];
 
   return (
-    <section className="mb-16" aria-label="Recent blog posts">
+    <section className="mt-12 sm:mt-16 mb-16" aria-label="Recent blog posts">
       <div className="max-w-[1200px] mx-auto px-8">
-        <h2 className="text-lg font-semibold tracking-tight text-foreground mb-6">Recent blog posts</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-foreground mb-8">Recent blog posts</h2>
 
         {/* Row 1: large left + 2 small right */}
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 mb-6">

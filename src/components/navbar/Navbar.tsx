@@ -108,14 +108,14 @@ export default function Navbar({ user }: { user: any }) {
 
           <button
             id="mobile-menu-toggle"
-            className="block sm:hidden w-8 h-8 relative focus:outline-none z-[1001]"
+            className="block sm:hidden relative w-6 h-[18px] focus:outline-none z-[1001] flex flex-col justify-between"
             onClick={() => setMenuOpen((v) => !v)}
             aria-label="Toggle menu"
             aria-expanded={menuOpen}
           >
-            <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-full h-[2px] bg-foreground transition-all duration-300 ${menuOpen ? "rotate-45" : "-translate-y-[6px]"}`} />
-            <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-full h-[2px] bg-foreground transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
-            <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-full h-[2px] bg-foreground transition-all duration-300 ${menuOpen ? "-rotate-45" : "translate-y-[6px]"}`} />
+            <span className={`block w-full h-[2px] bg-foreground rounded-full transition-all duration-300 ease-in-out origin-center ${menuOpen ? "rotate-45 translate-y-[8px]" : ""}`} />
+            <span className={`block w-full h-[2px] bg-foreground rounded-full transition-all duration-300 ease-in-out ${menuOpen ? "opacity-0 translate-x-2" : "opacity-100"}`} />
+            <span className={`block w-full h-[2px] bg-foreground rounded-full transition-all duration-300 ease-in-out origin-center ${menuOpen ? "-rotate-45 -translate-y-[8px]" : ""}`} />
           </button>
         </div>
       </div>

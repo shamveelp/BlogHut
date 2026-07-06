@@ -48,9 +48,9 @@ export default function AllPosts() {
   const pageNums = [1, 2, 3, "...", 8, 9, 10];
 
   return (
-    <section className="mb-24" aria-label="All blog posts">
+    <section className="mt-12 sm:mt-16 mb-24" aria-label="All blog posts">
       <div className="max-w-[1200px] mx-auto px-8">
-        <h2 className="text-lg font-semibold tracking-tight text-foreground mb-6">All blog posts</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-foreground mb-8">All blog posts</h2>
 
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-12 border-t border-border pt-8 mb-16" role="list">
           {allPosts.map((post, i) => (
