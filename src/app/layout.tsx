@@ -45,7 +45,7 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="site-body">
+      <body className="min-h-[100dvh] flex flex-col bg-background text-foreground font-sans antialiased transition-colors duration-300">
         <Toaster 
           position="top-center" 
           toastOptions={{
@@ -57,7 +57,7 @@ export default async function RootLayout({
           }}
         />
         <Navbar user={user} />
-        <main id="main-content" className="site-main">
+        <main id="main-content" className="flex-1">
           {children}
         </main>
         <Footer />

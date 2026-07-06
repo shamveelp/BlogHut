@@ -18,7 +18,7 @@ const TAG_COLORS: Record<string, string> = {
 function Tag({ label }: { label: string }) {
   const color = TAG_COLORS[label] ?? "#6b7280";
   return (
-    <span className="post-tag" style={{ background: color + "22", color, borderColor: color + "44" }}>
+    <span className="text-xs font-semibold tracking-[0.01em] px-2.5 py-1 rounded-full border" style={{ background: color + "22", color, borderColor: color + "44" }}>
       {label}
     </span>
   );
@@ -36,12 +36,12 @@ function PostImage({ seed, alt }: { seed: string; alt: string }) {
   };
   return (
     <div
-      className="post-img"
+      className="w-full h-full relative overflow-hidden rounded-lg group-hover:opacity-90 transition-opacity"
       style={{ background: gradients[seed] ?? gradients.a }}
       role="img"
       aria-label={alt}
     >
-      <div className="post-img__overlay" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
     </div>
   );
 }
@@ -93,41 +93,45 @@ export default function RecentPosts() {
   const wide = rest[2];
 
   return (
-    <section className="recent-posts" aria-label="Recent blog posts">
-      <div className="posts-container">
-        <h2 className="posts-section-label">Recent blog posts</h2>
+    <section className="mb-16" aria-label="Recent blog posts">
+      <div className="max-w-[1200px] mx-auto px-8">
+        <h2 className="text-lg font-semibold tracking-tight text-foreground mb-6">Recent blog posts</h2>
 
         {/* Row 1: large left + 2 small right */}
-        <div className="recent-row recent-row--top">
+        <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 mb-6">
           {/* Large card */}
-          <Link href={`/blog/${large.slug}`} className="post-card-large">
-            <PostImage seed={large.imgSeed} alt={large.title} />
-            <div className="post-card-large__body">
-              <div className="post-meta">{large.author} • {large.date}</div>
-              <div className="post-title-row">
-                <h3 className="post-title">{large.title}</h3>
-                <span className="post-arrow" aria-hidden="true">↗</span>
+          <Link href={`/blog/${large.slug}`} className="flex flex-col group md:border-r border-border md:pr-6">
+            <div className="h-[320px] mb-5">
+              <PostImage seed={large.imgSeed} alt={large.title} />
+            </div>
+            <div className="flex flex-col">
+              <div className="text-[13px] text-muted mb-2">{large.author} • {large.date}</div>
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <h3 className="text-2xl font-bold tracking-tight text-foreground group-hover:text-muted transition-colors">{large.title}</h3>
+                <span className="text-foreground transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" aria-hidden="true">↗</span>
               </div>
-              <p className="post-excerpt">{large.excerpt}</p>
-              <div className="post-tags">
+              <p className="text-[15px] text-dim leading-relaxed">{large.excerpt}</p>
+              <div className="flex flex-wrap gap-1.5 mt-3">
                 {large.tags.map((t) => <Tag key={t} label={t} />)}
               </div>
             </div>
           </Link>
 
           {/* 2 small cards stacked */}
-          <div className="recent-stack">
+          <div className="flex flex-col gap-6">
             {small.map((post) => (
-              <Link key={post.slug} href={`/blog/${post.slug}`} className="post-card-small">
-                <PostImage seed={post.imgSeed} alt={post.title} />
-                <div className="post-card-small__body">
-                  <div className="post-meta">{post.author} • {post.date}</div>
-                  <div className="post-title-row">
-                    <h3 className="post-title post-title--sm">{post.title}</h3>
-                    <span className="post-arrow" aria-hidden="true">↗</span>
+              <Link key={post.slug} href={`/blog/${post.slug}`} className="flex flex-col sm:grid sm:grid-cols-[140px_1fr] gap-5 group">
+                <div className="h-[200px] sm:h-auto">
+                  <PostImage seed={post.imgSeed} alt={post.title} />
+                </div>
+                <div className="flex flex-col justify-center">
+                  <div className="text-[13px] text-muted mb-2">{post.author} • {post.date}</div>
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <h3 className="text-lg font-semibold tracking-tight text-foreground group-hover:text-muted transition-colors">{post.title}</h3>
+                    <span className="text-foreground transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" aria-hidden="true">↗</span>
                   </div>
-                  <p className="post-excerpt post-excerpt--sm">{post.excerpt}</p>
-                  <div className="post-tags">
+                  <p className="text-[14px] text-dim leading-snug">{post.excerpt}</p>
+                  <div className="flex flex-wrap gap-1.5 mt-3">
                     {post.tags.map((t) => <Tag key={t} label={t} />)}
                   </div>
                 </div>
@@ -138,18 +142,18 @@ export default function RecentPosts() {
 
         {/* Row 2: wide dark card left + 1 card right */}
         {wide && (
-          <div className="recent-row recent-row--bottom">
-            <Link href={`/blog/${wide.slug}`} className="post-card-wide">
-              <div className="post-card-wide__img">
+          <div className="grid grid-cols-1 gap-6 mb-6">
+            <Link href={`/blog/${wide.slug}`} className="group block relative overflow-hidden rounded-xl bg-card border border-border">
+              <div className="w-full h-[360px] relative">
                 <PostImage seed={wide.imgSeed} alt={wide.title} />
-                <div className="post-card-wide__text-overlay">
-                  <div className="post-meta post-meta--light">{wide.author} • {wide.date}</div>
-                  <div className="post-title-row">
-                    <h3 className="post-title post-title--overlay">{wide.title}</h3>
-                    <span className="post-arrow post-arrow--light" aria-hidden="true">↗</span>
+                <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                  <div className="text-[13px] text-white/75 mb-2">{wide.author} • {wide.date}</div>
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="text-2xl font-bold tracking-tight text-white group-hover:text-white/80 transition-colors">{wide.title}</h3>
+                    <span className="text-white transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" aria-hidden="true">↗</span>
                   </div>
-                  <p className="post-excerpt post-excerpt--light">{wide.excerpt}</p>
-                  <div className="post-tags">
+                  <p className="text-[15px] text-white/80 leading-relaxed max-w-2xl">{wide.excerpt}</p>
+                  <div className="flex flex-wrap gap-1.5 mt-4">
                     {wide.tags.map((t) => <Tag key={t} label={t} />)}
                   </div>
                 </div>

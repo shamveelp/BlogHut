@@ -81,27 +81,27 @@ export default function ProfileClient({ user }: { user: any }) {
   };
 
   return (
-    <div className="profile-page">
-      <div className="profile-container">
-        <h1 className="profile-title">Your Profile</h1>
-        <p className="profile-subtitle">Manage your account settings</p>
+    <div className="min-h-[calc(100dvh-80px)] flex items-center justify-center p-5 md:p-10">
+      <div className="w-full max-w-[500px] bg-card border border-border rounded-xl p-8 md:p-10">
+        <h1 className="text-2xl font-bold text-foreground mb-1 text-center">Your Profile</h1>
+        <p className="text-sm text-muted text-center mb-8">Manage your account settings</p>
 
-        <div className="profile-avatar-section">
-          <div className="profile-avatar-wrapper">
+        <div className="flex flex-col items-center gap-4 mb-8">
+          <div className="relative w-24 h-24 rounded-full border-2 border-border bg-background flex items-center justify-center shadow-sm">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="Profile Avatar" className="profile-avatar-img" />
+              <img src={avatarUrl} alt="Profile Avatar" className="w-full h-full object-cover rounded-full" />
             ) : (
-              <div className="profile-avatar-placeholder">
+              <div className="text-3xl font-bold text-muted">
                 {name ? name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
               </div>
             )}
             <button 
-              className="profile-avatar-edit-btn" 
+              className="absolute bottom-0 right-0 bg-foreground text-background w-8 h-8 rounded-full flex items-center justify-center border-2 border-card cursor-pointer transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" 
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading || isSaving}
               aria-label="Change profile picture"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
             </button>
             <input 
               type="file" 
@@ -111,12 +111,14 @@ export default function ProfileClient({ user }: { user: any }) {
               onChange={handleImageChange}
             />
           </div>
-          <div className="profile-email-badge">{user.email}</div>
+          <div className="bg-[rgba(255,255,255,0.05)] dark:bg-[rgba(0,0,0,0.05)] text-muted px-3 py-1 rounded-full text-[13px] font-medium border border-border">
+            {user.email}
+          </div>
         </div>
 
-        <form onSubmit={handleSave} className="profile-form">
-          <div className="form-group">
-            <label htmlFor="name">Full Name</label>
+        <form onSubmit={handleSave} className="flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="name" className="text-sm font-medium text-foreground">Full Name</label>
             <input 
               type="text" 
               id="name" 
@@ -124,11 +126,12 @@ export default function ProfileClient({ user }: { user: any }) {
               onChange={(e) => setName(e.target.value)} 
               required 
               disabled={isSaving || isUploading}
+              className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors disabled:opacity-50"
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="username" className="text-sm font-medium text-foreground">Username</label>
             <input 
               type="text" 
               id="username" 
@@ -136,12 +139,13 @@ export default function ProfileClient({ user }: { user: any }) {
               onChange={(e) => setUsername(e.target.value)} 
               required 
               disabled={isSaving || isUploading}
+              className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors disabled:opacity-50"
             />
           </div>
 
           <button 
             type="submit" 
-            className="profile-save-btn" 
+            className="bg-foreground text-background py-3 rounded-md font-semibold text-[15px] mt-3 hover:opacity-85 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed" 
             disabled={isSaving || isUploading}
           >
             {isSaving ? "Saving..." : "Save Changes"}

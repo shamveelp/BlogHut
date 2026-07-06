@@ -21,30 +21,30 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        <h1 className="auth-title">Create an account</h1>
-        <p className="auth-subtitle">Join Blog Hut today</p>
+    <div className="min-h-[calc(100dvh-80px)] flex items-center justify-center p-5">
+      <div className="w-full max-w-[400px] bg-card border border-border rounded-xl p-8">
+        <h1 className="text-2xl font-bold text-foreground mb-1 text-center">Create an account</h1>
+        <p className="text-sm text-muted text-center mb-6">Join Blog Hut today</p>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label htmlFor="name">Full Name</label>
-            <input type="text" id="name" name="name" required placeholder="John Doe" />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="name" className="text-sm font-medium text-foreground">Full Name</label>
+            <input type="text" id="name" name="name" required placeholder="John Doe" className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors" />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <input type="text" id="username" name="username" required placeholder="johndoe" />
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="username" className="text-sm font-medium text-foreground">Username</label>
+            <input type="text" id="username" name="username" required placeholder="johndoe123" className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors" />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input type="email" id="email" name="email" required placeholder="you@example.com" />
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="email" className="text-sm font-medium text-foreground">Email</label>
+            <input type="email" id="email" name="email" required placeholder="you@example.com" className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors" />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <div className="password-input-wrapper">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="password" className="text-sm font-medium text-foreground">Password</label>
+            <div className="relative flex items-center">
               <input 
                 type={showPassword ? "text" : "password"} 
                 id="password" 
@@ -52,10 +52,11 @@ export default function SignupPage() {
                 required 
                 placeholder="••••••••" 
                 minLength={6} 
+                className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 pr-10 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors"
               />
               <button
                 type="button"
-                className="password-toggle-btn"
+                className="absolute right-2.5 bg-transparent border-none text-muted cursor-pointer flex items-center justify-center hover:text-foreground transition-colors"
                 onClick={() => setShowPassword((prev) => !prev)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
@@ -72,11 +73,11 @@ export default function SignupPage() {
             </div>
           </div>
 
-          <button type="submit" className="auth-btn">Sign up</button>
+          <button type="submit" className="bg-foreground text-background py-3 rounded-md font-semibold text-[15px] mt-3 hover:opacity-85 transition-opacity disabled:opacity-50">Sign up</button>
         </form>
 
-        <p className="auth-footer">
-          Already have an account? <Link href="/login">Log in</Link>
+        <p className="mt-6 text-sm text-center text-muted">
+          Already have an account? <Link href="/login" className="text-foreground font-medium underline underline-offset-4 hover:opacity-80">Log in</Link>
         </p>
       </div>
     </div>

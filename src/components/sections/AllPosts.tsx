@@ -22,7 +22,7 @@ const TAG_COLORS: Record<string, string> = {
 function Tag({ label }: { label: string }) {
   const color = TAG_COLORS[label] ?? "#6b7280";
   return (
-    <span className="post-tag" style={{ background: color + "22", color, borderColor: color + "44" }}>
+    <span className="text-xs font-semibold tracking-[0.01em] px-2.5 py-1 rounded-full border" style={{ background: color + "22", color, borderColor: color + "44" }}>
       {label}
     </span>
   );
@@ -48,28 +48,30 @@ export default function AllPosts() {
   const pageNums = [1, 2, 3, "...", 8, 9, 10];
 
   return (
-    <section className="all-posts" aria-label="All blog posts">
-      <div className="posts-container">
-        <h2 className="posts-section-label">All blog posts</h2>
+    <section className="mb-24" aria-label="All blog posts">
+      <div className="max-w-[1200px] mx-auto px-8">
+        <h2 className="text-lg font-semibold tracking-tight text-foreground mb-6">All blog posts</h2>
 
-        <ul className="all-posts__grid" role="list">
+        <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-12 border-t border-border pt-8 mb-16" role="list">
           {allPosts.map((post, i) => (
             <li key={post.slug}>
-              <Link href={`/blog/${post.slug}`} className="grid-post-card">
+              <Link href={`/blog/${post.slug}`} className="flex flex-col group h-full">
                 <div
-                  className="grid-post-card__img"
+                  className="w-full h-[240px] rounded-lg mb-5 overflow-hidden group-hover:opacity-90 transition-opacity relative"
                   style={{ background: `var(--img-${imgSeeds[i % imgSeeds.length]})` }}
                   role="img"
                   aria-label={post.title}
-                />
-                <div className="grid-post-card__body">
-                  <div className="post-meta">{post.author} • {post.date}</div>
-                  <div className="post-title-row">
-                    <h3 className="post-title post-title--md">{post.title}</h3>
-                    <span className="post-arrow" aria-hidden="true">↗</span>
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                </div>
+                <div className="flex flex-col flex-1">
+                  <div className="text-[13px] text-muted mb-2">{post.author} • {post.date}</div>
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="text-[20px] font-bold tracking-tight text-foreground group-hover:text-muted transition-colors leading-tight">{post.title}</h3>
+                    <span className="text-foreground transition-transform group-hover:-translate-y-1 group-hover:translate-x-1 flex-shrink-0" aria-hidden="true">↗</span>
                   </div>
-                  <p className="post-excerpt post-excerpt--sm">{post.excerpt}</p>
-                  <div className="post-tags">
+                  <p className="text-[14px] text-dim leading-relaxed mb-4 flex-1">{post.excerpt}</p>
+                  <div className="flex flex-wrap gap-1.5 mt-auto">
                     {post.tags.map((t) => <Tag key={t} label={t} />)}
                   </div>
                 </div>
@@ -79,9 +81,9 @@ export default function AllPosts() {
         </ul>
 
         {/* Pagination */}
-        <div className="pagination" role="navigation" aria-label="Pagination">
+        <div className="flex items-center justify-between pt-5 border-t border-border flex-wrap gap-4" role="navigation" aria-label="Pagination">
           <button
-            className="pagination__btn"
+            className="flex items-center gap-2 text-sm font-semibold text-muted hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
             aria-label="Previous page"
@@ -89,14 +91,14 @@ export default function AllPosts() {
             ← Previous
           </button>
 
-          <div className="pagination__pages">
+          <div className="flex items-center gap-1 hidden sm:flex">
             {pageNums.map((n, i) =>
               n === "..." ? (
-                <span key={`ellipsis-${i}`} className="pagination__ellipsis">…</span>
+                <span key={`ellipsis-${i}`} className="px-3 text-muted">…</span>
               ) : (
                 <button
                   key={n}
-                  className={`pagination__page ${page === n ? "active" : ""}`}
+                  className={`w-10 h-10 rounded-md text-sm font-medium transition-colors ${page === n ? "bg-[rgba(255,255,255,0.05)] text-foreground" : "text-muted hover:text-foreground hover:bg-[rgba(255,255,255,0.03)]"}`}
                   onClick={() => setPage(n as number)}
                   aria-label={`Page ${n}`}
                   aria-current={page === n ? "page" : undefined}
@@ -108,7 +110,7 @@ export default function AllPosts() {
           </div>
 
           <button
-            className="pagination__btn"
+            className="flex items-center gap-2 text-sm font-semibold text-muted hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             onClick={() => setPage((p) => Math.min(TOTAL_PAGES, p + 1))}
             disabled={page === TOTAL_PAGES}
             aria-label="Next page"
