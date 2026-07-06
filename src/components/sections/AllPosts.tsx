@@ -1,36 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-
-const TAG_COLORS: Record<string, string> = {
-  Design: "#f97316",
-  Research: "#3b82f6",
-  Presentation: "#22c55e",
-  Interface: "#6366f1",
-  Leadership: "#3b82f6",
-  Management: "#71717a",
-  Product: "#a855f7",
-  Frameworks: "#22c55e",
-  Tech: "#14b8a6",
-  Podcasts: "#ec4899",
-  "Customer Success": "#f59e0b",
-  "Software Development": "#06b6d4",
-  SaaS: "#a855f7",
-};
-
-function Tag({ label }: { label: string }) {
-  const color = TAG_COLORS[label] ?? "#6b7280";
-  return (
-    <span className="text-xs font-semibold tracking-[0.01em] px-2.5 py-1 rounded-full border" style={{ background: color + "22", color, borderColor: color + "44" }}>
-      {label}
-    </span>
-  );
-}
+import { GridBlogCard, type BlogPost } from "@/components/blog/BlogCards";
 
 const imgSeeds = ["e", "f", "a", "b", "c", "d", "e", "f", "a"];
 
-const allPosts = [
+const allPosts: BlogPost[] = [
   { slug: "bill-walsh-leadership", author: "Alec Whitten", date: "1 Jan 2023", title: "Bill Walsh leadership lessons", excerpt: "Like to know the secrets of transforming a 2-14 team into a 3x Super Bowl winning Dynasty?", tags: ["Leadership", "Management"] },
   { slug: "pm-mental-models", author: "Demi Wilkinson", date: "1 Jan 2023", title: "PM mental models", excerpt: "Mental models are simple expressions of complex processes or relationships.", tags: ["Product", "Research", "Frameworks"] },
   { slug: "what-is-wireframing", author: "Candice Wu", date: "1 Jan 2023", title: "What is Wireframing?", excerpt: "Introduction to Wireframing and its Principles. Learn from the best in the industry.", tags: ["Design", "Research"] },
@@ -55,27 +30,7 @@ export default function AllPosts() {
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-12 border-t border-border pt-8 mb-16" role="list">
           {allPosts.map((post, i) => (
             <li key={post.slug}>
-              <Link href={`/blog/${post.slug}`} className="flex flex-col group h-full">
-                <div
-                  className="w-full h-[240px] rounded-lg mb-5 overflow-hidden group-hover:opacity-90 transition-opacity relative"
-                  style={{ background: `var(--img-${imgSeeds[i % imgSeeds.length]})` }}
-                  role="img"
-                  aria-label={post.title}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                </div>
-                <div className="flex flex-col flex-1">
-                  <div className="text-[13px] text-muted mb-2">{post.author} • {post.date}</div>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="text-[20px] font-bold tracking-tight text-foreground group-hover:text-muted transition-colors leading-tight">{post.title}</h3>
-                    <span className="text-foreground transition-transform group-hover:-translate-y-1 group-hover:translate-x-1 flex-shrink-0" aria-hidden="true">↗</span>
-                  </div>
-                  <p className="text-[14px] text-dim leading-relaxed mb-4 flex-1">{post.excerpt}</p>
-                  <div className="flex flex-wrap gap-1.5 mt-auto">
-                    {post.tags.map((t) => <Tag key={t} label={t} />)}
-                  </div>
-                </div>
-              </Link>
+              <GridBlogCard post={{ ...post, imgSeed: imgSeeds[i % imgSeeds.length] }} />
             </li>
           ))}
         </ul>
