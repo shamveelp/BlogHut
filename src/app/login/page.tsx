@@ -10,6 +10,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const message = searchParams.get("message");
@@ -22,10 +23,12 @@ function LoginForm() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setLoading(true);
     const formData = new FormData(e.currentTarget);
     const res = await login(formData);
     if (res?.error) {
       toast.error(res.error);
+      setLoading(false);
     } else if (res?.success) {
       toast.success("Logged in successfully!");
       router.push("/");
@@ -34,8 +37,10 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-[calc(100dvh-80px)] flex flex-col md:flex-row items-center justify-center p-5 gap-6">
-      <div className="w-full max-w-[400px] bg-card border border-border rounded-xl p-8">
+    <div className="min-h-[calc(100dvh-80px)] flex flex-col md:flex-row items-center justify-center p-5 gap-8">
+      <div className="w-full max-w-[400px] bg-card border border-border rounded-2xl p-8 sm:p-10 shadow-2xl shadow-black/5 relative overflow-hidden">
+        {/* Subtle decorative gradient */}
+        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-foreground/20 to-transparent"></div>
         <h1 className="text-2xl font-bold text-foreground mb-1 text-center">Welcome back</h1>
         <p className="text-sm text-muted text-center mb-6">Log in to your account</p>
 
@@ -50,7 +55,7 @@ function LoginForm() {
               placeholder="you@example.com" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors" 
+              className="w-full bg-transparent border border-border text-foreground px-4 py-3 rounded-xl font-sans text-sm focus:outline-none focus:ring-2 focus:ring-foreground/10 focus:border-foreground transition-all" 
             />
           </div>
 
@@ -65,7 +70,7 @@ function LoginForm() {
                 placeholder="••••••••" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 pr-10 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors"
+                className="w-full bg-transparent border border-border text-foreground px-4 py-3 pr-10 rounded-xl font-sans text-sm focus:outline-none focus:ring-2 focus:ring-foreground/10 focus:border-foreground transition-all"
               />
               <button
                 type="button"
@@ -86,7 +91,17 @@ function LoginForm() {
             </div>
           </div>
 
-          <button type="submit" className="bg-foreground text-background py-3 rounded-md font-semibold text-[15px] mt-3 hover:opacity-85 transition-opacity disabled:opacity-50">Log in</button>
+          <button type="submit" disabled={loading} className="bg-foreground text-background py-3.5 rounded-xl font-semibold text-[15px] mt-4 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 shadow-lg shadow-foreground/10 flex items-center justify-center gap-2">
+            {loading ? (
+              <>
+                <svg className="animate-spin h-5 w-5 text-background" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Logging in...
+              </>
+            ) : "Log in"}
+          </button>
         </form>
 
         <p className="mt-6 text-sm text-center text-muted">
@@ -95,13 +110,17 @@ function LoginForm() {
       </div>
 
       {/* Guest Login Section */}
-      <div className="w-full max-w-[350px] md:max-w-[300px] bg-card border border-border rounded-xl p-6">
-        <h2 className="text-lg font-bold text-foreground mb-2">For Testers</h2>
-        <p className="text-sm text-muted mb-4">Click below to auto-fill guest credentials and log in instantly.</p>
+      <div className="w-full max-w-[350px] md:max-w-[320px] bg-muted/20 border border-border/50 rounded-2xl p-6 sm:p-8 backdrop-blur-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-foreground/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+        <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+          For Testers
+        </h2>
+        <p className="text-sm text-muted mb-5 leading-relaxed">Click below to auto-fill guest credentials and log in instantly without typing.</p>
         
-        <div className="bg-background border border-border p-3 rounded-md mb-4 font-mono text-sm space-y-1.5 break-all">
-          <p><span className="text-muted font-sans font-medium">Email:</span><br />guestuser@blog-hut.vercel.app</p>
-          <p><span className="text-muted font-sans font-medium">Password:</span><br />Guest@123</p>
+        <div className="bg-background/80 border border-border p-3.5 rounded-xl mb-5 font-mono text-sm space-y-2 break-all shadow-inner">
+          <p><span className="text-muted font-sans font-medium text-xs uppercase tracking-wider">Email</span><br /><span className="text-foreground">guestuser@blog-hut.vercel.app</span></p>
+          <p><span className="text-muted font-sans font-medium text-xs uppercase tracking-wider">Password</span><br /><span className="text-foreground">Guest@123</span></p>
         </div>
         
         <button 
@@ -109,8 +128,9 @@ function LoginForm() {
           onClick={() => {
             setEmail("guestuser@blog-hut.vercel.app");
             setPassword("Guest@123");
+            toast.success("Credentials applied!");
           }}
-          className="w-full bg-border text-foreground py-2.5 rounded-md font-semibold text-sm hover:bg-muted transition-colors"
+          className="w-full bg-background border border-border text-foreground py-3 rounded-xl font-semibold text-sm hover:border-foreground hover:bg-foreground hover:text-background transition-all active:scale-[0.98]"
         >
           Apply Credentials
         </button>
