@@ -3,37 +3,101 @@
 import { useState, useRef } from "react";
 import toast from "react-hot-toast";
 import { updateProfile } from "@/app/auth/actions";
-import Image from "next/image";
+import Link from "next/link";
+import ReactCrop, { type Crop, centerCrop, makeAspectCrop, PixelCrop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
+
+function getCroppedImg(image: HTMLImageElement, crop: PixelCrop): Promise<Blob> {
+  const canvas = document.createElement('canvas');
+  const scaleX = image.naturalWidth / image.width;
+  const scaleY = image.naturalHeight / image.height;
+  canvas.width = crop.width;
+  canvas.height = crop.height;
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) return Promise.reject(new Error('No 2d context'));
+
+  ctx.drawImage(
+    image,
+    crop.x * scaleX,
+    crop.y * scaleY,
+    crop.width * scaleX,
+    crop.height * scaleY,
+    0,
+    0,
+    crop.width,
+    crop.height
+  );
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('Canvas is empty'));
+        return;
+      }
+      resolve(blob);
+    }, 'image/jpeg');
+  });
+}
 
 export default function ProfileClient({ user }: { user: any }) {
   const metadata = user.user_metadata || {};
   const [name, setName] = useState(metadata.full_name || "");
   const [username, setUsername] = useState(metadata.username || "");
   const [avatarUrl, setAvatarUrl] = useState(metadata.avatar_url || "");
+  
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Cropping State
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [imgSrc, setImgSrc] = useState("");
+  const [crop, setCrop] = useState<Crop>();
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+  const imgRef = useRef<HTMLImageElement>(null);
 
-    // Validate size (e.g. max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image must be less than 5MB");
-      return;
+  const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image must be less than 5MB");
+        return;
+      }
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        setImgSrc(reader.result?.toString() || '');
+        setCropModalOpen(true);
+      });
+      reader.readAsDataURL(file);
     }
+  };
 
+  const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { width, height } = e.currentTarget;
+    const c = centerCrop(makeAspectCrop({ unit: '%', width: 90 }, 1, width, height), width, height);
+    setCrop(c);
+  };
+
+  const handleUploadCroppedImage = async () => {
+    if (!completedCrop || !imgRef.current) return;
+    
+    setCropModalOpen(false);
     setIsUploading(true);
     const toastId = toast.loading("Uploading image...");
 
     try {
+      const blob = await getCroppedImg(imgRef.current, completedCrop);
+      const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
+
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", process.env.NEXT_PUBLIC_UPLOAD_PRESET!);
+      formData.append("upload_preset", process.env.NEXT_PUBLIC_UPLOAD_PRESET || "ml_default"); // Provide a fallback just in case
 
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_NAME;
+      if (!cloudName) throw new Error("Cloudinary not configured");
+
       const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
         method: "POST",
         body: formData,
@@ -43,7 +107,7 @@ export default function ProfileClient({ user }: { user: any }) {
 
       if (response.ok) {
         setAvatarUrl(data.secure_url);
-        toast.success("Image uploaded successfully!", { id: toastId });
+        toast.success("Image uploaded successfully! Remember to save changes.", { id: toastId });
       } else {
         throw new Error(data.error?.message || "Upload failed");
       }
@@ -51,9 +115,7 @@ export default function ProfileClient({ user }: { user: any }) {
       toast.error(error.message, { id: toastId });
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -72,7 +134,7 @@ export default function ProfileClient({ user }: { user: any }) {
       
       if (res.error) throw new Error(res.error);
       
-      toast.success("Profile updated!", { id: toastId });
+      toast.success("Profile updated successfully!", { id: toastId });
     } catch (error: any) {
       toast.error(error.message, { id: toastId });
     } finally {
@@ -80,78 +142,171 @@ export default function ProfileClient({ user }: { user: any }) {
     }
   };
 
-  return (
-    <div className="min-h-[calc(100dvh-80px)] flex items-center justify-center p-5 md:p-10">
-      <div className="w-full max-w-[500px] bg-card border border-border rounded-xl p-8 md:p-10">
-        <h1 className="text-2xl font-bold text-foreground mb-1 text-center">Your Profile</h1>
-        <p className="text-sm text-muted text-center mb-8">Manage your account settings</p>
+  // Mock data for user's blogs until database is connected
+  const userBlogs: any[] = [];
 
-        <div className="flex flex-col items-center gap-4 mb-8">
-          <div className="relative w-24 h-24 rounded-full border-2 border-border bg-background flex items-center justify-center shadow-sm">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="Profile Avatar" className="w-full h-full object-cover rounded-full" />
-            ) : (
-              <div className="text-3xl font-bold text-muted">
-                {name ? name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
+  return (
+    <div className="min-h-screen pt-12 pb-24 px-4 sm:px-8 max-w-[1200px] mx-auto flex flex-col gap-16">
+      
+      {/* Top Section: Settings */}
+      <section>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Profile Settings</h1>
+          <p className="text-muted">Manage your personal information and preferences.</p>
+        </div>
+
+        <div className="bg-card border border-border rounded-2xl p-6 sm:p-10 flex flex-col lg:flex-row gap-12 shadow-sm">
+          {/* Avatar Area */}
+          <div className="flex flex-col items-center lg:items-start gap-4">
+            <div className="relative w-32 h-32 rounded-full border-4 border-background shadow-xl bg-muted flex items-center justify-center overflow-hidden group">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Profile Avatar" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+              ) : (
+                <div className="text-4xl font-bold text-muted-foreground">
+                  {name ? name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
+                </div>
+              )}
+              
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <button 
+                  className="bg-foreground text-background w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-transform" 
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading || isSaving}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                </button>
               </div>
-            )}
-            <button 
-              className="absolute bottom-0 right-0 bg-foreground text-background w-8 h-8 rounded-full flex items-center justify-center border-2 border-card cursor-pointer transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" 
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading || isSaving}
-              aria-label="Change profile picture"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-            </button>
+            </div>
+            
+            <div className="text-center lg:text-left">
+              <div className="font-semibold text-foreground text-lg">{name || 'Your Name'}</div>
+              <div className="text-sm text-muted bg-[rgba(255,255,255,0.05)] dark:bg-[rgba(0,0,0,0.05)] px-3 py-1 rounded-full inline-block mt-2 border border-border">
+                {user.email}
+              </div>
+            </div>
             <input 
               type="file" 
               accept="image/*" 
               ref={fileInputRef} 
               style={{ display: "none" }} 
-              onChange={handleImageChange}
+              onChange={onSelectFile}
             />
           </div>
-          <div className="bg-[rgba(255,255,255,0.05)] dark:bg-[rgba(0,0,0,0.05)] text-muted px-3 py-1 rounded-full text-[13px] font-medium border border-border">
-            {user.email}
+
+          {/* Form Area */}
+          <form onSubmit={handleSave} className="flex-1 flex flex-col gap-6 lg:border-l border-border lg:pl-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="flex flex-col gap-2">
+                <label htmlFor="name" className="text-sm font-semibold text-foreground">Full Name</label>
+                <input 
+                  type="text" 
+                  id="name" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                  required 
+                  disabled={isSaving || isUploading}
+                  className="bg-transparent border border-border text-foreground px-4 py-3 rounded-lg text-sm focus:outline-none focus:border-muted focus:ring-1 focus:ring-muted transition-all disabled:opacity-50"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="username" className="text-sm font-semibold text-foreground">Username</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted select-none">@</span>
+                  <input 
+                    type="text" 
+                    id="username" 
+                    value={username} 
+                    onChange={(e) => setUsername(e.target.value)} 
+                    required 
+                    disabled={isSaving || isUploading}
+                    className="w-full bg-transparent border border-border text-foreground pl-8 pr-4 py-3 rounded-lg text-sm focus:outline-none focus:border-muted focus:ring-1 focus:ring-muted transition-all disabled:opacity-50"
+                    placeholder="johndoe"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 flex justify-end">
+              <button 
+                type="submit" 
+                className="bg-foreground text-background px-8 py-3 rounded-lg font-bold text-sm hover:opacity-85 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" 
+                disabled={isSaving || isUploading}
+              >
+                {isSaving ? "Saving Changes..." : "Save Changes"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      {/* Bottom Section: User Blogs */}
+      <section>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-foreground mb-1">Your Blogs</h2>
+            <p className="text-muted">Articles and stories you have published.</p>
           </div>
+          <button className="hidden sm:flex bg-transparent border border-border text-foreground px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-foreground/5 transition-colors">
+            Write New Blog
+          </button>
         </div>
 
-        <form onSubmit={handleSave} className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="name" className="text-sm font-medium text-foreground">Full Name</label>
-            <input 
-              type="text" 
-              id="name" 
-              value={name} 
-              onChange={(e) => setName(e.target.value)} 
-              required 
-              disabled={isSaving || isUploading}
-              className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors disabled:opacity-50"
-            />
+        {userBlogs.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Will render blog cards here once connected to db */}
           </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="username" className="text-sm font-medium text-foreground">Username</label>
-            <input 
-              type="text" 
-              id="username" 
-              value={username} 
-              onChange={(e) => setUsername(e.target.value)} 
-              required 
-              disabled={isSaving || isUploading}
-              className="w-full bg-transparent border border-border text-foreground px-3.5 py-2.5 rounded-md font-sans text-sm focus:outline-none focus:border-muted transition-colors disabled:opacity-50"
-            />
+        ) : (
+          <div className="w-full bg-card border border-border border-dashed rounded-2xl p-12 flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mb-4">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </div>
+            <h3 className="text-xl font-bold text-foreground mb-2">No blogs yet</h3>
+            <p className="text-muted max-w-sm mb-6">You haven't written any articles yet. Start sharing your thoughts and stories with the world!</p>
+            <button className="bg-foreground text-background px-6 py-3 rounded-lg font-bold text-sm hover:opacity-85 transition-opacity shadow-sm">
+              Write your first blog
+            </button>
           </div>
+        )}
+      </section>
 
-          <button 
-            type="submit" 
-            className="bg-foreground text-background py-3 rounded-md font-semibold text-[15px] mt-3 hover:opacity-85 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed" 
-            disabled={isSaving || isUploading}
-          >
-            {isSaving ? "Saving..." : "Save Changes"}
-          </button>
-        </form>
-      </div>
+      {/* Image Crop Modal */}
+      {cropModalOpen && (
+        <div className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-[500px] shadow-2xl flex flex-col overflow-hidden max-h-[90dvh]">
+            <div className="p-5 border-b border-border flex justify-between items-center shrink-0">
+              <h3 className="text-lg font-bold text-foreground">Crop Profile Picture</h3>
+              <button onClick={() => setCropModalOpen(false)} className="text-muted hover:text-foreground">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+            <div className="p-6 flex flex-col items-center justify-center bg-background/50 overflow-y-auto">
+              {imgSrc && (
+                <ReactCrop
+                  crop={crop}
+                  onChange={(_, percentCrop) => setCrop(percentCrop)}
+                  onComplete={(c) => setCompletedCrop(c)}
+                  aspect={1}
+                  circularCrop
+                >
+                  <img
+                    ref={imgRef}
+                    alt="Crop me"
+                    src={imgSrc}
+                    onLoad={onImageLoad}
+                    className="max-h-[50vh] w-auto object-contain"
+                  />
+                </ReactCrop>
+              )}
+            </div>
+            <div className="p-5 border-t border-border flex justify-end gap-3 shrink-0">
+              <button onClick={() => setCropModalOpen(false)} className="px-4 py-2 rounded-lg font-semibold text-sm text-foreground hover:bg-foreground/5 transition-colors">Cancel</button>
+              <button onClick={handleUploadCroppedImage} className="bg-foreground text-background px-6 py-2 rounded-lg font-bold text-sm hover:opacity-85 transition-opacity">Apply & Upload</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

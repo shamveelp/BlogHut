@@ -78,7 +78,7 @@ export default function Navbar({ user }: { user: any }) {
                 </button>
                 
                 {profileOpen && (
-                  <div className="absolute top-[calc(100%+12px)] right-0 w-56 bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl py-2 flex flex-col z-50 transform origin-top-right transition-all">
+                  <div className="absolute top-[calc(100%+12px)] right-0 w-56 bg-card border border-border rounded-xl shadow-2xl py-2 flex flex-col z-50 transform origin-top-right transition-all">
                     <div className="px-4 py-3 text-sm text-muted border-b border-border/50 mb-1 flex flex-col">
                        <span className="font-semibold text-foreground truncate">{user.user_metadata?.full_name || 'User'}</span>
                        <span className="text-xs truncate">{user.email}</span>
