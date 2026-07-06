@@ -7,6 +7,7 @@ import 'react-image-crop/dist/ReactCrop.css';
 import toast from "react-hot-toast";
 import { createBlog, updateBlog } from "@/app/blog/actions";
 import { useRouter } from "next/navigation";
+import RichTextEditor from "./RichTextEditor";
 
 function getCroppedImg(image: HTMLImageElement, crop: PixelCrop): Promise<Blob> {
   const canvas = document.createElement('canvas');
@@ -277,8 +278,8 @@ export default function WriteBlogModal({
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 flex-1">
-                <textarea placeholder="Write your full story here..." value={content} onChange={e => setContent(e.target.value)} className="bg-transparent border border-border rounded-lg p-4 font-sans text-base text-foreground min-h-[300px] resize-y focus:outline-none focus:border-muted transition-colors flex-1"></textarea>
+              <div className="flex flex-col gap-2 flex-1 min-h-[350px]">
+                <RichTextEditor content={content} onChange={setContent} />
               </div>
             </form>
           </div>

@@ -59,9 +59,10 @@ export default async function BlogDetailsPage({ params }: { params: { slug: stri
           </p>
         )}
         
-        <div className="prose prose-lg dark:prose-invert prose-p:leading-loose prose-p:text-dim prose-headings:text-foreground max-w-none whitespace-pre-wrap">
-          {blog.content}
-        </div>
+        <div 
+          className="prose prose-lg dark:prose-invert prose-p:leading-loose prose-p:text-dim prose-headings:text-foreground max-w-none"
+          dangerouslySetInnerHTML={{ __html: blog.content }}
+        />
       </div>
     </article>
   );
