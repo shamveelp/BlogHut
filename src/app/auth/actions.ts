@@ -55,3 +55,27 @@ export async function logout() {
   revalidatePath("/", "layout");
   redirect("/");
 }
+
+export async function updateProfile(formData: FormData) {
+  const name = formData.get("name") as string;
+  const username = formData.get("username") as string;
+  const avatar_url = formData.get("avatar_url") as string;
+
+  const supabase = await createSupabaseServerClient();
+  
+  const { error } = await supabase.auth.updateUser({
+    data: {
+      full_name: name,
+      username: username,
+      ...(avatar_url ? { avatar_url } : {})
+    }
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/", "layout");
+  revalidatePath("/profile");
+  return { success: true };
+}

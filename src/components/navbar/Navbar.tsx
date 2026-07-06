@@ -8,6 +8,7 @@ export default function Navbar({ user }: { user: any }) {
   const [dark, setDark] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [writeModalOpen, setWriteModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -31,6 +32,16 @@ export default function Navbar({ user }: { user: any }) {
         <Link href="/" className="navbar__logo">Blog Hut</Link>
 
         <div className="navbar__actions">
+          {user && (
+            <button 
+              className="write-btn"
+              onClick={() => setWriteModalOpen(true)}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              <span>Write</span>
+            </button>
+          )}
+
           <button
             className="theme-toggle"
             onClick={() => setDark((d) => !d)}
@@ -47,17 +58,22 @@ export default function Navbar({ user }: { user: any }) {
 
           <div className="profile-menu" ref={dropdownRef}>
             {user ? (
-              <>
+              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <button
                   className="profile-btn"
+                  style={user.user_metadata?.avatar_url ? { padding: 0, overflow: 'hidden', border: 'none' } : {}}
                   onClick={() => setProfileOpen((v) => !v)}
                   aria-label="Toggle profile menu"
                   aria-expanded={profileOpen}
                 >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
+                  {user.user_metadata?.avatar_url ? (
+                    <img src={user.user_metadata.avatar_url} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  )}
                 </button>
                 
                 {profileOpen && (
@@ -75,7 +91,7 @@ export default function Navbar({ user }: { user: any }) {
                     </button>
                   </div>
                 )}
-              </>
+              </div>
             ) : (
               <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                 <Link href="/login" style={{ fontSize: '14px', fontWeight: 500 }}>Log in</Link>
@@ -106,6 +122,7 @@ export default function Navbar({ user }: { user: any }) {
 
           {user ? (
             <>
+              <button className="mobile-menu-link" onClick={() => { setMenuOpen(false); setWriteModalOpen(true); }}>Write a Blog</button>
               <Link href="/profile" className="mobile-menu-link" onClick={() => setMenuOpen(false)}>Profile</Link>
               <button 
                 className="mobile-menu-link" 
@@ -147,6 +164,29 @@ export default function Navbar({ user }: { user: any }) {
           </svg>
         </button>
       </div>
+
+      {writeModalOpen && (
+        <div className="write-modal-overlay">
+          <div className="write-modal">
+            <div className="write-modal__header">
+              <h2>Create a new story</h2>
+              <button className="write-modal__close" onClick={() => setWriteModalOpen(false)}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+            <div className="write-modal__content">
+              <form className="write-modal__form">
+                <input type="text" placeholder="Title" className="write-modal__input write-modal__input--title" />
+                <textarea placeholder="Tell your story..." className="write-modal__textarea"></textarea>
+                <div className="write-modal__actions">
+                  <button type="button" className="write-modal__cancel" onClick={() => setWriteModalOpen(false)}>Cancel</button>
+                  <button type="submit" className="write-modal__submit">Publish</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
