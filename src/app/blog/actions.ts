@@ -3,6 +3,16 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+export async function checkSlugAvailable(slug: string, currentBlogId?: string) {
+  const supabase = await createSupabaseServerClient();
+  let query = supabase.from("blogs").select("id").eq("slug", slug);
+  if (currentBlogId) {
+    query = query.neq("id", currentBlogId);
+  }
+  const { data } = await query.single();
+  return { available: !data };
+}
+
 export async function createBlog(formData: FormData) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -23,10 +33,16 @@ export async function createBlog(formData: FormData) {
     return { error: "Title and content are required." };
   }
 
-  // Generate slug
-  let slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
-  // Ensure uniqueness in a real app by appending ID or checking db, but this is fine for now
-  slug = `${slug}-${Math.random().toString(36).substring(2, 8)}`;
+  let slug = (formData.get("slug") as string)?.trim();
+  
+  if (!slug) {
+    slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+    slug = `${slug}-${Math.random().toString(36).substring(2, 8)}`;
+  }
+
+  if (slug.length < 5 || slug.length > 30) {
+    return { error: "Slug must be between 5 and 30 characters long." };
+  }
 
   const tags = tagsStr ? tagsStr.split(",").map((t) => t.trim()).filter(Boolean) : [];
 
@@ -69,6 +85,11 @@ export async function updateBlog(formData: FormData) {
 
   const tags = tagsStr ? tagsStr.split(",").map((t) => t.trim()).filter(Boolean) : [];
 
+  let slug = (formData.get("slug") as string)?.trim();
+  if (slug && (slug.length < 5 || slug.length > 30)) {
+    return { error: "Slug must be between 5 and 30 characters long." };
+  }
+
   const updateData: any = {
     title,
     excerpt,
@@ -78,6 +99,10 @@ export async function updateBlog(formData: FormData) {
     status,
     updated_at: new Date().toISOString(),
   };
+
+  if (slug) {
+    updateData.slug = slug;
+  }
 
   if (cover_image) updateData.cover_image = cover_image;
 

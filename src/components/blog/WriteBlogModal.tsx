@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useRef, useTransition } from "react";
+import { useState, useRef, useTransition, useEffect } from "react";
 import { createPortal } from "react-dom";
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import toast from "react-hot-toast";
-import { createBlog, updateBlog } from "@/app/blog/actions";
+import { createBlog, updateBlog, checkSlugAvailable } from "@/app/blog/actions";
 import { useRouter } from "next/navigation";
 import RichTextEditor from "./RichTextEditor";
 
@@ -49,6 +49,9 @@ export default function WriteBlogModal({
   const [isPending, startTransition] = useTransition();
 
   const [title, setTitle] = useState(existingBlog?.title || "");
+  const [slug, setSlug] = useState(existingBlog?.slug || "");
+  const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
+  const [checkingSlug, setCheckingSlug] = useState(false);
   const [excerpt, setExcerpt] = useState(existingBlog?.excerpt || "");
   const [content, setContent] = useState(existingBlog?.content || "");
   const [category, setCategory] = useState(existingBlog?.category || "");
@@ -65,6 +68,21 @@ export default function WriteBlogModal({
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const imgRef = useRef<HTMLImageElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Debounced slug checker
+  useEffect(() => {
+    if (!slug || slug.length < 5 || slug.length > 30) {
+      setSlugAvailable(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setCheckingSlug(true);
+      const res = await checkSlugAvailable(slug, existingBlog?.id);
+      setSlugAvailable(res.available);
+      setCheckingSlug(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [slug, existingBlog?.id]);
 
   const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -134,6 +152,7 @@ export default function WriteBlogModal({
       const formData = new FormData();
       if (existingBlog) formData.append("id", existingBlog.id);
       formData.append("title", title);
+      formData.append("slug", slug);
       formData.append("excerpt", excerpt);
       formData.append("content", content);
       formData.append("category", category);
@@ -197,6 +216,41 @@ export default function WriteBlogModal({
 
               <div className="flex flex-col gap-2">
                 <input type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} required className="bg-transparent border border-border rounded-lg p-4 font-sans text-2xl font-bold text-foreground focus:outline-none focus:border-muted focus:ring-1 focus:ring-muted transition-colors placeholder:font-normal" />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-foreground flex justify-between">
+                  <span>Custom Slug URL</span>
+                  <span className={`text-xs font-semibold ${
+                    slug.length > 0 && slug.length < 5 ? 'text-red-500' :
+                    slug.length > 30 ? 'text-red-500' :
+                    slugAvailable === false ? 'text-red-500' :
+                    slugAvailable === true ? 'text-green-500' : 'text-muted'
+                  }`}>
+                    {slug.length > 0 && slug.length < 5 ? 'Too short (min 5)' :
+                     slug.length > 30 ? 'Too long (max 30)' :
+                     checkingSlug ? 'Checking...' :
+                     slugAvailable === false ? 'Slug is taken' :
+                     slugAvailable === true ? 'Slug available' :
+                     `${slug.length} / 30`}
+                  </span>
+                </label>
+                <div className="relative flex items-center">
+                  <span className="absolute left-4 text-muted select-none">/blog/</span>
+                  <input 
+                    type="text" 
+                    placeholder="my-awesome-story" 
+                    value={slug} 
+                    onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} 
+                    className={`w-full bg-transparent border ${
+                      slug.length > 0 && (slug.length < 5 || slug.length > 30 || slugAvailable === false) 
+                        ? 'border-red-500 focus:ring-red-500' 
+                        : slugAvailable === true 
+                        ? 'border-green-500 focus:ring-green-500' 
+                        : 'border-border focus:border-muted focus:ring-muted'
+                    } rounded-lg pl-16 pr-4 py-3 font-sans text-sm text-foreground focus:outline-none focus:ring-1 transition-colors`}
+                  />
+                </div>
               </div>
 
               <div className="flex flex-col gap-2">
