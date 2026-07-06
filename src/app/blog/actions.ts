@@ -3,6 +3,18 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+export async function searchBlogs(query: string) {
+  if (!query || query.trim() === "") return [];
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase
+    .from("blogs")
+    .select("id, title, slug, cover_image, excerpt, category")
+    .eq("status", "published")
+    .ilike("title", `%${query}%`)
+    .limit(5);
+  return data || [];
+}
+
 export async function checkSlugAvailable(slug: string, currentBlogId?: string) {
   const supabase = await createSupabaseServerClient();
   let query = supabase.from("blogs").select("id").eq("slug", slug);

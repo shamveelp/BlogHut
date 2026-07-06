@@ -321,9 +321,9 @@ export default function ProfileClient({ user, initialBlogs = [] }: { user: any, 
                       Draft
                     </div>
                   )}
-                  <div className="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => openWriteModal(blog)} className="bg-card text-foreground px-3 py-1.5 rounded text-xs font-semibold border border-border hover:bg-muted/20 shadow-sm">Edit</button>
-                    <button onClick={() => setDeleteConfirmId(blog.id)} className="bg-red-500/10 text-red-500 px-3 py-1.5 rounded text-xs font-semibold border border-red-500/20 hover:bg-red-500/20 shadow-sm">Delete</button>
+                  <div className="absolute top-4 right-4 flex items-center gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <button onClick={() => openWriteModal(blog)} className="bg-black text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-black/80 shadow-md transition-all">Edit</button>
+                    <button onClick={() => setDeleteConfirmId(blog.id)} className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-700 shadow-md transition-all">Delete</button>
                   </div>
                 </div>
               ))}

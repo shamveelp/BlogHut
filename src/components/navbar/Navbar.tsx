@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { logout } from "@/app/auth/actions";
 import WriteBlogModal from "@/components/blog/WriteBlogModal";
+import GlobalSearch from "./GlobalSearch";
 
 export default function Navbar({ user }: { user: any }) {
   const [mounted, setMounted] = useState(false);
@@ -39,6 +40,8 @@ export default function Navbar({ user }: { user: any }) {
         <Link href="/" className="text-2xl font-bold tracking-tight text-foreground hover:opacity-80 transition-opacity z-[1001]">Blog Hut</Link>
 
         <div className="flex items-center gap-4 sm:gap-6">
+          <GlobalSearch />
+          
           <button
             className="hidden sm:flex relative items-center w-16 h-8 rounded-full bg-foreground transition-colors hover:opacity-90 shadow-sm"
             onClick={() => setDark((d) => !d)}
